@@ -1,0 +1,25 @@
+# Python 3.8-compatible pins for running on Windows 7 (64-bit).
+#
+# Why this file exists: Python 3.9+ cannot start on Windows 7/Vista at all
+# (it statically links api-ms-win-core-path-l1-1-0.dll, which those OSes
+# don't ship — you get an "is missing from your computer" error before
+# Python even runs). Python 3.8.10 is the last release that officially
+# supports Windows 7, and Django 4.2 (used by this project) still supports
+# Python 3.8. However, several packages pinned in the main requirements.txt
+# have since raised their minimum Python version to 3.9+, so a plain
+# `pip install -r requirements.txt` will fail under Python 3.8. This file
+# swaps just those packages for the newest version that still supports
+# Python 3.8, keeping everything else the same.
+#
+# Use this INSTEAD of requirements.txt when your interpreter is Python 3.8
+# (e.g. on Windows 7). On Windows 10/11 with a current Python, keep using
+# the normal requirements.txt.
+
+Django==4.2.30
+asgiref==3.8.1
+dj-database-url==2.2.0
+psycopg2-binary==2.9.9
+python-decouple==3.8
+sqlparse==0.5.5
+whitenoise==6.7.0
+gunicorn==23.0.0
