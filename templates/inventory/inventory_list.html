@@ -1,0 +1,63 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<div class="top-actions">
+    <a href="{% url 'inventory:product_add' %}" class="btn">+ Add New Product</a>
+</div>
+
+{% include "inventory/_filter_bar.html" %}
+
+{% if variants %}
+<div class="table-wrapper">
+<table class="inv-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Company</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Origin</th>
+            <th>Added</th>
+            <th>Stock</th>
+            <th>Price (BDT)</th>
+            <th>Expiry</th>
+            <th class="action-col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in variants %}
+        <tr>
+            <td><a href="{% url 'inventory:product_detail' v.product.id %}">{{ v.product.name }}</a></td>
+            <td>{{ v.size_label }}</td>
+            <td>{{ v.product.brand.company.name|default:"—" }}</td>
+            <td>{{ v.product.brand.name }}</td>
+            <td>{{ v.product.category.name }}</td>
+            <td>{{ v.product.country_of_origin }}</td>
+            <td>{{ v.product.date_added }}</td>
+            <td>
+                {{ v.formatted_quantity }} {{ v.unit }}
+                {% if v.is_low_stock %}<span class="badge low-stock">LOW</span>{% endif %}
+            </td>
+            <td>{{ v.selling_price }}</td>
+            <td>
+                {% if v.expiry_date %}
+                    {{ v.expiry_date }}
+                    {% if v.expiry_status == "expired" %}<span class="badge expired">Expired</span>
+                    {% elif v.expiry_status == "critical" %}<span class="badge critical">Soon</span>
+                    {% elif v.expiry_status == "warning" %}<span class="badge warning">Watch</span>
+                    {% endif %}
+                {% else %}
+                    &mdash;
+                {% endif %}
+            </td>
+            <td class="action-col"><a href="{% url 'inventory:product_detail' v.product.id %}" class="btn btn-secondary">Manage</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">No products found. <a href="{% url 'inventory:product_add' %}">Add your first product</a>.</div>
+{% endif %}
+{% endblock %}

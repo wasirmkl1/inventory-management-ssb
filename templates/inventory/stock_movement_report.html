@@ -1,0 +1,128 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<h2 style="margin-top:0;">Stock In / Stock Out Report</h2>
+<p style="color:#666;margin-top:-8px;">All stock movements for the selected date range and filters.</p>
+
+<form method="get" class="filter-bar no-print">
+    <input type="text" name="q" placeholder="Search product name..." value="{{ selected.q }}">
+
+    <select name="company">
+        <option value="">All companies</option>
+        {% for co in companies %}
+        <option value="{{ co.id }}" {% if selected.company == co.id|stringformat:"s" %}selected{% endif %}>{{ co.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="category">
+        <option value="">All categories</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if selected.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="brand">
+        <option value="">All brands</option>
+        {% for b in brands %}
+        <option value="{{ b.id }}" {% if selected.brand == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="country">
+        <option value="">All countries</option>
+        {% for country in countries %}
+        <option value="{{ country }}" {% if selected.country == country %}selected{% endif %}>{{ country }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="unit">
+        <option value="">All units</option>
+        {% for value, label in units %}
+        <option value="{{ value }}" {% if selected.unit == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="movement_type">
+        <option value="">Stock In &amp; Out</option>
+        <option value="in" {% if selected.movement_type == "in" %}selected{% endif %}>Stock In only</option>
+        <option value="out" {% if selected.movement_type == "out" %}selected{% endif %}>Stock Out only</option>
+    </select>
+
+    <label class="date-range-field">From
+        <input type="date" name="date_from" value="{{ date_from }}">
+    </label>
+    <label class="date-range-field">To
+        <input type="date" name="date_to" value="{{ date_to }}">
+    </label>
+
+    <button type="submit" class="btn">Apply</button>
+    <a href="." class="btn btn-secondary">Reset</a>
+</form>
+
+<div class="print-header">
+    <h2>Stock In / Stock Out Report</h2>
+    <p>
+        {% if date_from or date_to %}Date range: {{ date_from|default:"…" }} to {{ date_to|default:"…" }}{% else %}All dates{% endif %}
+        &middot; Generated {% now "Y-m-d H:i" %}
+    </p>
+</div>
+
+<div class="summary-cards">
+    <div class="summary-card">
+        <div class="summary-label">Total Stock In</div>
+        <div class="summary-value">{{ totals.total_in }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Total Stock Out</div>
+        <div class="summary-value">{{ totals.total_out }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Net Change</div>
+        <div class="summary-value">{{ totals.net_change }}</div>
+    </div>
+</div>
+
+<div class="top-actions">
+    <button type="button" class="btn btn-secondary no-print" onclick="window.print()">🖨 Print</button>
+    <a href="?{{ request.GET.urlencode }}&export=csv" class="btn no-print">Download CSV</a>
+</div>
+
+{% if movements %}
+<div class="table-wrapper">
+<table class="inv-table">
+    <thead>
+        <tr>
+            <th>Date/Time</th>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Company</th>
+            <th>Brand</th>
+            <th>Movement</th>
+            <th>Quantity</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in movements %}
+        <tr>
+            <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+            <td><a href="{% url 'inventory:product_detail' m.variant.product.id %}">{{ m.variant.product.name }}</a></td>
+            <td>{{ m.variant.size_label }}</td>
+            <td>{{ m.variant.product.brand.company.name|default:"—" }}</td>
+            <td>{{ m.variant.product.brand.name }}</td>
+            <td>
+                {% if m.movement_type == "in" %}<span class="badge ok">Stock In</span>
+                {% else %}<span class="badge low-stock">Stock Out</span>
+                {% endif %}
+            </td>
+            <td>{{ m.quantity }}</td>
+            <td>{{ m.note|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">No stock movements match this filter.</div>
+{% endif %}
+{% endblock %}

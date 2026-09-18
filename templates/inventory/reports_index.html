@@ -1,0 +1,17 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<h2 style="margin-top:0;">Reports</h2>
+<p style="color:#666;margin-top:-8px;">Pick a report below. Both support filters and a date range, plus CSV export/download.</p>
+
+<div class="report-cards">
+    <a href="{% url 'inventory:inventory_report' %}" class="report-card">
+        <h3>Inventory Report</h3>
+        <p>Current stock levels and stock value (cost &amp; selling price) across all products, with the same filters as the Inventory tab plus a "date added" range.</p>
+    </a>
+    <a href="{% url 'inventory:stock_movement_report' %}" class="report-card">
+        <h3>Stock In / Stock Out Report</h3>
+        <p>Every stock movement (in and out) for a chosen date range, with totals — useful to see what moved in/out of your shop over a period.</p>
+    </a>
+</div>
+{% endblock %}

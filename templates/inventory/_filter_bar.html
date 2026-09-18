@@ -1,0 +1,62 @@
+<form method="get" class="filter-bar">
+    <input type="text" name="q" placeholder="Search product name..." value="{{ selected.q }}">
+
+    <select name="company">
+        <option value="">All companies</option>
+        {% for co in companies %}
+        <option value="{{ co.id }}" {% if selected.company == co.id|stringformat:"s" %}selected{% endif %}>{{ co.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="category">
+        <option value="">All categories</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if selected.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="brand">
+        <option value="">All brands</option>
+        {% for b in brands %}
+        <option value="{{ b.id }}" {% if selected.brand == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="country">
+        <option value="">All countries</option>
+        {% for country in countries %}
+        <option value="{{ country }}" {% if selected.country == country %}selected{% endif %}>{{ country }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="unit">
+        <option value="">All units</option>
+        {% for value, label in units %}
+        <option value="{{ value }}" {% if selected.unit == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;">
+        <input type="checkbox" name="low_stock" value="1" {% if selected.low_stock %}checked{% endif %} style="width:auto;">
+        Low stock only
+    </label>
+
+    {% if extra_range_field %}{{ extra_range_field|safe }}{% endif %}
+
+    <select name="sort">
+        <option value="">Sort: default</option>
+        <option value="name" {% if selected.sort == "name" %}selected{% endif %}>Name (A-Z)</option>
+        <option value="-name" {% if selected.sort == "-name" %}selected{% endif %}>Name (Z-A)</option>
+        <option value="stock" {% if selected.sort == "stock" %}selected{% endif %}>Stock (low-high)</option>
+        <option value="-stock" {% if selected.sort == "-stock" %}selected{% endif %}>Stock (high-low)</option>
+        <option value="price" {% if selected.sort == "price" %}selected{% endif %}>Price (low-high)</option>
+        <option value="-price" {% if selected.sort == "-price" %}selected{% endif %}>Price (high-low)</option>
+        <option value="expiry" {% if selected.sort == "expiry" %}selected{% endif %}>Expiry (soonest first)</option>
+        <option value="-expiry" {% if selected.sort == "-expiry" %}selected{% endif %}>Expiry (latest first)</option>
+        <option value="-added" {% if selected.sort == "-added" %}selected{% endif %}>Date added (newest first)</option>
+        <option value="added" {% if selected.sort == "added" %}selected{% endif %}>Date added (oldest first)</option>
+    </select>
+
+    <button type="submit" class="btn">Apply</button>
+    <a href="." class="btn btn-secondary">Reset</a>
+</form>

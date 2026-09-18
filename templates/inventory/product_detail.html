@@ -1,0 +1,94 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<div class="top-actions" style="justify-content: space-between;">
+    <a href="{% url 'inventory:inventory_list' %}" class="btn btn-secondary">&larr; Back to Inventory</a>
+    <a href="{% url 'inventory:product_edit' product.id %}" class="btn">Edit Product</a>
+</div>
+
+<div class="card">
+    <h2 style="margin-top:0;">{{ product.name }}</h2>
+    <p>
+        {% if product.brand.company %}<strong>Company:</strong> {{ product.brand.company.name }} &nbsp;|&nbsp;{% endif %}
+        <strong>Brand:</strong> {{ product.brand.name }} &nbsp;|&nbsp;
+        <strong>Category:</strong> {{ product.category.name }} &nbsp;|&nbsp;
+        <strong>Origin:</strong> {{ product.country_of_origin }} &nbsp;|&nbsp;
+        <strong>Added:</strong> {{ product.date_added }}
+    </p>
+    {% if product.description %}<p>{{ product.description }}</p>{% endif %}
+</div>
+
+{% if size_totals %}
+<h3>Total Stock by Size</h3>
+<p style="color:#666;margin-top:-8px;">Adds up all batches of the same size, so you can see the grand total per size at a glance.</p>
+<div class="summary-cards">
+    {% for row in size_totals %}
+    <div class="summary-card">
+        <div class="summary-label">{{ row.size_label }}{% if row.batch_count > 1 %} &middot; {{ row.batch_count }} batches{% endif %}</div>
+        <div class="summary-value">{{ row.formatted_total }} {{ row.unit }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h3>Sizes / Variants</h3>
+{% for v in variants %}
+<div class="card">
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+        <div>
+            <strong>{{ v.size_label }}</strong><br>
+            Stock: {{ v.formatted_quantity }} {{ v.get_unit_display }}
+            {% if v.is_low_stock %}<span class="badge low-stock">LOW STOCK</span>{% endif %}
+            <br>
+            Price: {{ v.selling_price }} BDT &nbsp;|&nbsp; Cost: {{ v.cost_price }} BDT
+            {% if v.batch_number %}<br>Batch: {{ v.batch_number }}{% endif %}
+            <br>
+            Expiry:
+            {% if v.expiry_date %}
+                {{ v.expiry_date }}
+                {% if v.expiry_status == "expired" %}<span class="badge expired">Expired</span>
+                {% elif v.expiry_status == "critical" %}<span class="badge critical">Soon</span>
+                {% elif v.expiry_status == "warning" %}<span class="badge warning">Watch</span>
+                {% else %}<span class="badge ok">OK</span>
+                {% endif %}
+            {% else %}&mdash;{% endif %}
+        </div>
+        <div>
+            <form method="post" action="{% url 'inventory:stock_action' v.id %}" class="stock-form-inline">
+                {% csrf_token %}
+                <select name="movement_type">
+                    <option value="in">Stock In</option>
+                    <option value="out">Stock Out</option>
+                </select>
+                <input type="number" step="0.01" name="quantity" placeholder="Qty" required style="width:80px;">
+                <input type="text" name="note" placeholder="Note (optional)" style="width:140px;">
+                <button type="submit" class="btn">Save</button>
+            </form>
+        </div>
+    </div>
+
+    {% with movements=v.movements.all %}
+    {% if movements %}
+    <details style="margin-top:10px;">
+        <summary style="cursor:pointer; color:#555;">Movement history ({{ movements.count }})</summary>
+        <table class="movement-table">
+            <thead><tr><th>Date</th><th>Type</th><th>Qty</th><th>Note</th></tr></thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ m.get_movement_type_display }}</td>
+                    <td>{{ m.quantity }}</td>
+                    <td>{{ m.note }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </details>
+    {% endif %}
+    {% endwith %}
+</div>
+{% empty %}
+<div class="empty-state">No variants yet. <a href="{% url 'inventory:product_edit' product.id %}">Add a size/weight variant</a>.</div>
+{% endfor %}
+{% endblock %}

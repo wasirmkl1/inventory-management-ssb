@@ -1,0 +1,81 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<h2 style="margin-top:0;">Inventory Report</h2>
+<p style="color:#666;margin-top:-8px;">Current stock and stock value, with the usual filters plus a "date added" range.</p>
+
+<div class="no-print">{% include "inventory/_filter_bar.html" %}</div>
+
+<div class="print-header">
+    <h2>Inventory Report</h2>
+    <p>
+        {% if date_from or date_to %}Date added: {{ date_from|default:"…" }} to {{ date_to|default:"…" }}{% else %}All dates{% endif %}
+        &middot; Generated {% now "Y-m-d H:i" %}
+    </p>
+</div>
+
+<div class="summary-cards">
+    <div class="summary-card">
+        <div class="summary-label">Variants</div>
+        <div class="summary-value">{{ totals.total_variants }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Stock Value (Cost)</div>
+        <div class="summary-value">{{ totals.total_cost_value|floatformat:2 }} BDT</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Stock Value (Selling)</div>
+        <div class="summary-value">{{ totals.total_selling_value|floatformat:2 }} BDT</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Potential Profit</div>
+        <div class="summary-value">{{ totals.total_potential_profit|floatformat:2 }} BDT</div>
+    </div>
+</div>
+
+<div class="top-actions">
+    <button type="button" class="btn btn-secondary no-print" onclick="window.print()">🖨 Print</button>
+    <a href="?{{ request.GET.urlencode }}&export=csv" class="btn no-print">Download CSV</a>
+</div>
+
+{% if variants %}
+<div class="table-wrapper">
+<table class="inv-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Company</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Added</th>
+            <th>Stock</th>
+            <th>Cost (BDT)</th>
+            <th>Selling (BDT)</th>
+            <th>Value at Cost</th>
+            <th>Value at Selling</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in variants %}
+        <tr>
+            <td><a href="{% url 'inventory:product_detail' v.product.id %}">{{ v.product.name }}</a></td>
+            <td>{{ v.size_label }}</td>
+            <td>{{ v.product.brand.company.name|default:"—" }}</td>
+            <td>{{ v.product.brand.name }}</td>
+            <td>{{ v.product.category.name }}</td>
+            <td>{{ v.product.date_added }}</td>
+            <td>{{ v.formatted_quantity }} {{ v.unit }}</td>
+            <td>{{ v.cost_price }}</td>
+            <td>{{ v.selling_price }}</td>
+            <td>{{ v.stock_value_cost }}</td>
+            <td>{{ v.stock_value_selling }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">No products match this filter.</div>
+{% endif %}
+{% endblock %}

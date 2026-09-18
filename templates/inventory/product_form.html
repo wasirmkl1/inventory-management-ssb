@@ -1,0 +1,80 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<div class="top-actions">
+    <a href="{% if is_edit %}{% url 'inventory:product_detail' product.id %}{% else %}{% url 'inventory:inventory_list' %}{% endif %}" class="btn btn-secondary">&larr; Back</a>
+</div>
+
+<h2>{% if is_edit %}Edit Product{% else %}Add New Product{% endif %}</h2>
+
+<form method="post" class="stacked-form">
+    {% csrf_token %}
+
+    <div class="card">
+        <h3 style="margin-top:0;">Product details</h3>
+        {{ form.as_p }}
+        <p style="font-size:0.8rem; color:#777;">
+            Don't see the brand/category you need? Add it quickly in the
+            <a href="/admin/inventory/brand/add/" target="_blank">admin</a> /
+            <a href="/admin/inventory/category/add/" target="_blank">admin</a> first, then come back and refresh.
+            <br>Tip: Company is set once per Brand (e.g. Brand "Garnier" → Company "L'Oréal"), not per product —
+            set it when adding the brand in <a href="/admin/inventory/brand/add/" target="_blank">Admin → Brands</a>,
+            and every product under that brand will show it automatically.
+        </p>
+    </div>
+
+    <div class="card variant-formset">
+        <h3 style="margin-top:0;">Sizes / Weights (e.g. mini 90ml, big 400ml)</h3>
+        <p style="font-size:0.85rem; color:#5b7370; margin-top:-6px;">
+            Each size has its own <strong>Expiry date</strong> field — set it separately per size, since a mini bottle and a big bottle from the same shipment can expire on different dates.
+        </p>
+        {{ formset.management_form }}
+        <div id="variant-forms">
+            {% for vform in formset %}
+            <div class="variant-row">
+                {{ vform.id }}
+                {% for field in vform.visible_fields %}
+                <p>
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-variant-row" class="btn btn-secondary" style="margin-top:6px;">+ Add another size</button>
+        <p style="font-size:0.8rem; color:#777; margin-top:10px;">Leave a row blank to skip it. Check "Delete" on a row to remove an existing variant.</p>
+    </div>
+
+    <button type="submit" class="btn">{% if is_edit %}Save Changes{% else %}Add Product{% endif %}</button>
+</form>
+
+<template id="empty-variant-template">
+    <div class="variant-row">
+        {% for field in formset.empty_form.visible_fields %}
+        <p>
+            <label>{{ field.label }}</label>
+            {{ field }}
+        </p>
+        {% endfor %}
+    </div>
+</template>
+
+<script>
+(function () {
+    var addBtn = document.getElementById("add-variant-row");
+    var container = document.getElementById("variant-forms");
+    var totalFormsInput = document.getElementById("id_variants-TOTAL_FORMS");
+    var templateHtml = document.getElementById("empty-variant-template").innerHTML;
+
+    addBtn.addEventListener("click", function () {
+        var formIndex = parseInt(totalFormsInput.value, 10);
+        var newRowHtml = templateHtml.replace(/__prefix__/g, formIndex);
+        var wrapper = document.createElement("div");
+        wrapper.innerHTML = newRowHtml.trim();
+        container.appendChild(wrapper.firstElementChild);
+        totalFormsInput.value = formIndex + 1;
+    });
+})();
+</script>
+{% endblock %}

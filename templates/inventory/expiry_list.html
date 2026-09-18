@@ -1,0 +1,64 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<h2 style="margin-top:0;">Product Expiry Tracker</h2>
+<p style="color:#666;margin-top:-8px;">Sorted by nearest expiry first. Only shows variants that have an expiry date set.</p>
+
+<div class="range-chips">
+    <a href="?range=" class="{% if not range_filter %}active{% endif %}">All</a>
+    <a href="?range=expired" class="{% if range_filter == 'expired' %}active{% endif %}">Expired</a>
+    <a href="?range=7" class="{% if range_filter == '7' %}active{% endif %}">Next 7 days</a>
+    <a href="?range=15" class="{% if range_filter == '15' %}active{% endif %}">Next 15 days</a>
+    <a href="?range=30" class="{% if range_filter == '30' %}active{% endif %}">Next 30 days</a>
+    <a href="?range=90" class="{% if range_filter == '90' %}active{% endif %}">Next 3 months</a>
+    <a href="?range=180" class="{% if range_filter == '180' %}active{% endif %}">Next 6 months</a>
+    <a href="?range=365" class="{% if range_filter == '365' %}active{% endif %}">Next 1 year</a>
+</div>
+
+{% include "inventory/_filter_bar.html" %}
+
+{% if variants %}
+<div class="table-wrapper">
+<table class="inv-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Size</th>
+            <th>Company</th>
+            <th>Brand</th>
+            <th>Origin</th>
+            <th>Added</th>
+            <th>Stock</th>
+            <th>Expiry Date</th>
+            <th>Status</th>
+            <th class="action-col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in variants %}
+        <tr>
+            <td><a href="{% url 'inventory:product_detail' v.product.id %}">{{ v.product.name }}</a></td>
+            <td>{{ v.size_label }}</td>
+            <td>{{ v.product.brand.company.name|default:"—" }}</td>
+            <td>{{ v.product.brand.name }}</td>
+            <td>{{ v.product.country_of_origin }}</td>
+            <td>{{ v.product.date_added }}</td>
+            <td>{{ v.formatted_quantity }} {{ v.unit }}</td>
+            <td>{{ v.expiry_date }}</td>
+            <td>
+                {% if v.expiry_status == "expired" %}<span class="badge expired">Expired</span>
+                {% elif v.expiry_status == "critical" %}<span class="badge critical">≤30 days</span>
+                {% elif v.expiry_status == "warning" %}<span class="badge warning">≤90 days</span>
+                {% else %}<span class="badge ok">OK</span>
+                {% endif %}
+            </td>
+            <td class="action-col"><a href="{% url 'inventory:product_detail' v.product.id %}" class="btn btn-secondary">Manage</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state">No variants with an expiry date match this filter.</div>
+{% endif %}
+{% endblock %}

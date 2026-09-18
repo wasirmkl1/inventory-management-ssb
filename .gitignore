@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+*.log
+
+# Personal data exports (see README "Moving your data to a different computer")
+inventory_backup.json
+*.backup.json
+
+# Env
+.env
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
