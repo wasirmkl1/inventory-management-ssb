@@ -421,6 +421,45 @@ labels instead. If you still see this error:
    If you edited the file yourself, re-download a fresh copy instead of
    fixing it by hand.
 
+### Running this on Windows 7 (64-bit)
+Windows 7 is old enough that a few extra steps are needed — Microsoft ended
+its support in January 2020, and current Python/Git installers no longer
+target it. It still works, just with older tool versions:
+
+1. **Install Python 3.8.10** — the last Python release that officially runs
+   on Windows 7 (Python 3.9+ requires a system DLL Windows 7 doesn't have,
+   and won't even start). Get the 64-bit installer directly from
+   [python.org/downloads/release/python-3810](https://www.python.org/downloads/release/python-3810/)
+   (scroll to "Windows installer (64-bit)"). Check **"Add python.exe to
+   PATH"** during install.
+2. **Install Git for Windows 2.46.x** — this is the last release with
+   Windows 7 support; anything newer won't install. Get it from the
+   [Git for Windows releases page](https://github.com/git-for-windows/git/releases)
+   (look for a `v2.46.x.windows.1` asset), not the main git-scm.com download
+   (which now points to a newer, incompatible build).
+3. **Clone the repo and run the launcher as normal** (see [section 0](#0-just-want-to-open-it-in-a-browser-without-typing-commands)
+   or [section 1](#1-cloning-the-repo-windows--cmd--vs-code)) — double-click
+   `start_windows.bat`.
+4. The launcher auto-detects Python 3.8 and installs from
+   **`requirements-win7.txt`** instead of `requirements.txt`. This exists
+   because some pinned packages in the normal `requirements.txt` (`asgiref`,
+   `dj-database-url`, `psycopg2-binary`, `whitenoise`) have since raised
+   their minimum Python version past 3.8, so they'd fail to install under
+   Python 3.8. `requirements-win7.txt` pins the newest release of each of
+   those that still supports Python 3.8; Django itself (4.2.x) supports
+   3.8 natively, so it's unchanged. If you're setting up manually instead of
+   using the launcher, install from that file explicitly:
+   ```cmd
+   pip install -r requirements-win7.txt
+   ```
+5. Everything else (SQLite database, `manage.py migrate`, `createsuperuser`,
+   `runserver`, browsing to `http://127.0.0.1:8000/`) works exactly as
+   described in the rest of this README.
+
+> If you'd rather not fight with old installers at all, remember the app can
+> also be [hosted online for free](#5-hosting-it-for-free-so-you-can-check-it-from-your-phone)
+> — then Windows 7 only needs a browser, no Python/Git install required.
+
 ### `AttributeError: 'super' object has no attribute 'dicts'` when opening `/admin/...`
 This means your Python version is **3.14**, which Django 4.2 (used by this
 project) doesn't officially support yet — it's a known Django/Python

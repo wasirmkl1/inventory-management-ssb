@@ -62,7 +62,11 @@ python -m venv venv
 if errorlevel 1 goto :setup_failed
 
 echo Installing dependencies (needs an internet connection)...
-venv\Scripts\python.exe -m pip install --disable-pip-version-check -r requirements.txt
+set REQ_FILE=requirements.txt
+venv\Scripts\python.exe -c "import sys; sys.exit(0 if sys.version_info[:2]==(3,8) else 1)"
+if not errorlevel 1 set REQ_FILE=requirements-win7.txt
+if "%REQ_FILE%"=="requirements-win7.txt" echo Detected Python 3.8 (e.g. Windows 7) - using requirements-win7.txt instead.
+venv\Scripts\python.exe -m pip install --disable-pip-version-check -r %REQ_FILE%
 if errorlevel 1 goto :pip_failed
 
 echo Setting up the database...
